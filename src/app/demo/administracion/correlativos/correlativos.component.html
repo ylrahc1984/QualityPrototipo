@@ -1,0 +1,314 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="feather icon-hash me-2"></i>
+          Gestión de Correlativos
+        </h5>
+      </div>
+      <div class="card-body">
+        <!-- Barra de herramientas -->
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="feather icon-search"></i>
+              </span>
+              <input type="text"
+                     class="form-control"
+                     placeholder="Buscar correlativo..."
+                     [(ngModel)]="searchTerm"
+                     (input)="onSearchChange()">
+            </div>
+          </div>
+          <div class="col-md-3">
+            <select class="form-select"
+                    [(ngModel)]="moduleFilter"
+                    (change)="onFilterChange()">
+              <option value="">Todos los módulos</option>
+              <option *ngFor="let module of modules" [value]="module.value">
+                {{ module.label }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select class="form-select"
+                    [(ngModel)]="statusFilter"
+                    (change)="onFilterChange()">
+              <option value="">Todos los estados</option>
+              <option value="active">Activos</option>
+              <option value="inactive">Inactivos</option>
+            </select>
+          </div>
+          <div class="col-md-2 text-end">
+            <button class="btn btn-primary" (click)="createNewCorrelativo()">
+              <i class="feather icon-plus me-1"></i>
+              Nuevo Correlativo
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabla de correlativos -->
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>Nombre</th>
+                <th>Módulo</th>
+                <th>Prefijo</th>
+                <th>Ejemplo</th>
+                <th>Número Actual</th>
+                <th>Dígitos</th>
+                <th>Estado</th>
+                <th>Última Modificación</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let correlativo of getPaginatedCorrelativos()">
+                <td>
+                  <strong>{{ correlativo.name }}</strong>
+                  <br>
+                  <small class="text-muted">{{ correlativo.description }}</small>
+                </td>
+                <td>
+                  <span class="badge bg-primary">{{ getModuleLabel(correlativo.module) }}</span>
+                </td>
+                <td>
+                  <code>{{ correlativo.prefix }}</code>
+                </td>
+                <td>
+                  <span class="badge bg-light text-dark font-monospace">
+                    {{ generatePreview(correlativo) }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge bg-info">{{ correlativo.currentNumber }}</span>
+                </td>
+                <td>
+                  <span class="badge bg-secondary">{{ correlativo.digits }}</span>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="correlativo.isActive ? 'bg-success' : 'bg-danger'">
+                    <i class="feather" [ngClass]="correlativo.isActive ? 'icon-check-circle' : 'icon-x-circle'"></i>
+                    {{ correlativo.isActive ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td>
+                  <small class="text-muted">{{ formatDate(correlativo.updatedAt) }}</small>
+                </td>
+                <td class="text-center">
+                  <div class="btn-group" role="group">
+                    <button class="btn btn-sm btn-outline-primary"
+                            (click)="editCorrelativo(correlativo)"
+                            title="Editar">
+                      <i class="feather icon-edit"></i>
+                    </button>
+                    <button class="btn btn-sm"
+                            [ngClass]="correlativo.isActive ? 'btn-outline-warning' : 'btn-outline-success'"
+                            (click)="toggleCorrelativoStatus(correlativo)"
+                            [title]="correlativo.isActive ? 'Desactivar' : 'Activar'">
+                      <i class="feather" [ngClass]="correlativo.isActive ? 'icon-pause-circle' : 'icon-play-circle'"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger"
+                            (click)="deleteCorrelativo(correlativo)"
+                            title="Eliminar">
+                      <i class="feather icon-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="getPaginatedCorrelativos().length === 0">
+                <td colspan="9" class="text-center py-4">
+                  <i class="feather icon-inbox display-4 text-muted"></i>
+                  <p class="text-muted mt-2">No se encontraron correlativos</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginación -->
+        <div class="row mt-3" *ngIf="totalPages > 1">
+          <div class="col-12">
+            <nav aria-label="Navegación de páginas">
+              <ul class="pagination justify-content-center">
+                <li class="page-item" [ngClass]="{'disabled': currentPage === 1}">
+                  <a class="page-link" href="#" (click)="goToPage(currentPage - 1); $event.preventDefault()">
+                    <i class="feather icon-chevron-left"></i>
+                  </a>
+                </li>
+                <li class="page-item"
+                    *ngFor="let page of [].constructor(totalPages); let i = index"
+                    [ngClass]="{'active': currentPage === i + 1}">
+                  <a class="page-link" href="#" (click)="goToPage(i + 1); $event.preventDefault()">
+                    {{ i + 1 }}
+                  </a>
+                </li>
+                <li class="page-item" [ngClass]="{'disabled': currentPage === totalPages}">
+                  <a class="page-link" href="#" (click)="goToPage(currentPage + 1); $event.preventDefault()">
+                    <i class="feather icon-chevron-right"></i>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+
+        <!-- Información de resumen -->
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="alert alert-light border">
+              <small class="text-muted">
+                <i class="feather icon-info me-1"></i>
+                Mostrando {{ getPaginatedCorrelativos().length }} de {{ totalCorrelativos }} correlativos
+                <span *ngIf="searchTerm || moduleFilter || statusFilter" class="ms-2">
+                  (filtrado)
+                </span>
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para crear/editar correlativo -->
+<div class="modal fade" id="correlativoModal" tabindex="-1" #correlativoModal>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="feather icon-hash me-2"></i>
+          {{ isEditing ? 'Editar Correlativo' : 'Nuevo Correlativo' }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" *ngIf="currentCorrelativo">
+        <form #correlativoForm="ngForm">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Nombre <span class="text-danger">*</span></label>
+              <input type="text"
+                     class="form-control"
+                     [(ngModel)]="currentCorrelativo.name"
+                     name="name"
+                     required
+                     placeholder="Ej: Código de Reserva">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Módulo <span class="text-danger">*</span></label>
+              <select class="form-select"
+                      [(ngModel)]="currentCorrelativo.module"
+                      name="module"
+                      required>
+                <option value="">Seleccionar módulo</option>
+                <option *ngFor="let module of modules" [value]="module.value">
+                  {{ module.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-12">
+              <label class="form-label">Descripción <span class="text-danger">*</span></label>
+              <textarea class="form-control"
+                        rows="2"
+                        [(ngModel)]="currentCorrelativo.description"
+                        name="description"
+                        required
+                        placeholder="Descripción del correlativo..."></textarea>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label class="form-label">Prefijo <span class="text-danger">*</span></label>
+              <input type="text"
+                     class="form-control text-uppercase"
+                     [(ngModel)]="currentCorrelativo.prefix"
+                     name="prefix"
+                     required
+                     maxlength="5"
+                     placeholder="Ej: RSV">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Separador</label>
+              <select class="form-select"
+                      [(ngModel)]="currentCorrelativo.separator"
+                      name="separator">
+                <option *ngFor="let sep of separators" [value]="sep.value">
+                  {{ sep.label }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Dígitos <span class="text-danger">*</span></label>
+              <input type="number"
+                     class="form-control"
+                     [(ngModel)]="currentCorrelativo.digits"
+                     name="digits"
+                     required
+                     min="1"
+                     max="10"
+                     placeholder="4">
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Número Inicial <span class="text-danger">*</span></label>
+              <input type="number"
+                     class="form-control"
+                     [(ngModel)]="currentCorrelativo.currentNumber"
+                     name="currentNumber"
+                     required
+                     min="1"
+                     placeholder="1">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Estado</label>
+              <div class="form-check form-switch">
+                <input class="form-check-input"
+                       type="checkbox"
+                       [(ngModel)]="currentCorrelativo.isActive"
+                       name="isActive"
+                       id="isActive">
+                <label class="form-check-label" for="isActive">
+                  {{ currentCorrelativo.isActive ? 'Activo' : 'Inactivo' }}
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vista previa del correlativo -->
+          <div class="row mb-3" *ngIf="currentCorrelativo.prefix && currentCorrelativo.digits">
+            <div class="col-12">
+              <label class="form-label">Vista Previa</label>
+              <div class="alert alert-info">
+                <strong>Ejemplo generado:</strong>
+                <code class="ms-2">{{ generatePreview(currentCorrelativo) }}</code>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="feather icon-x me-1"></i>
+          Cancelar
+        </button>
+        <button type="button"
+                class="btn btn-primary"
+                (click)="saveCorrelativo()"
+                [disabled]="!isFormValid">
+          <i class="feather icon-save me-1"></i>
+          {{ isEditing ? 'Actualizar' : 'Crear' }} Correlativo
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

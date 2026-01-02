@@ -1,0 +1,79 @@
+<div class="row">
+  <div class="col-12">
+    <app-card cardTitle="{{ isEditing ? 'Editar Lista de Precios' : 'Nueva Lista de Precios' }}">
+      <form>
+        <div class="form-group">
+          <label>Nombre <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="formData.nombre" name="nombre" required
+                 [class.is-invalid]="formData.nombre === '' && formData.nombre !== undefined">
+          <div class="invalid-feedback" *ngIf="formData.nombre === ''">El nombre es requerido.</div>
+        </div>
+
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea class="form-control" [(ngModel)]="formData.descripcion" name="descripcion" rows="3"
+                    placeholder="Descripción opcional de la lista de precios"></textarea>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Moneda <span class="text-danger">*</span></label>
+              <select class="form-control" [(ngModel)]="formData.moneda" name="moneda" required
+                      [class.is-invalid]="!formData.moneda">
+                <option value="">Seleccione una moneda</option>
+                <option value="CRC">CRC - Colón Costarricense</option>
+                <option value="USD">USD - Dólar Estadounidense</option>
+                <option value="EUR">EUR - Euro</option>
+              </select>
+              <div class="invalid-feedback" *ngIf="!formData.moneda">La moneda es requerida.</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Vigencia Desde <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" [(ngModel)]="formData.vigenciaDesde" name="vigenciaDesde" required
+                     [class.is-invalid]="!formData.vigenciaDesde">
+              <div class="invalid-feedback" *ngIf="!formData.vigenciaDesde">La fecha de vigencia desde es requerida.</div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="form-group">
+              <label>Vigencia Hasta <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" [(ngModel)]="formData.vigenciaHasta" name="vigenciaHasta" required
+                     [class.is-invalid]="!formData.vigenciaHasta || hasDateRangeError()">
+              <div class="invalid-feedback" *ngIf="!formData.vigenciaHasta">La fecha de vigencia hasta es requerida.</div>
+              <div class="invalid-feedback" *ngIf="hasDateRangeError()">
+                La fecha hasta no puede ser menor que la fecha desde.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" [(ngModel)]="formData.activa" name="activa" id="activaCheck">
+            <label class="form-check-label" for="activaCheck">
+              Lista Activa
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Observaciones</label>
+          <textarea class="form-control" [(ngModel)]="formData.observaciones" name="observaciones" rows="2"
+                    placeholder="Observaciones opcionales"></textarea>
+        </div>
+
+        <div class="form-group text-right">
+          <button type="button" class="btn btn-secondary mr-2" (click)="cancel()">
+            <i class="feather icon-x"></i> Cancelar
+          </button>
+          <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!validateForm()">
+            <i class="feather icon-save"></i> Guardar
+          </button>
+        </div>
+      </form>
+    </app-card>
+  </div>
+</div>

@@ -1,0 +1,267 @@
+<div class="row" *ngIf="listaPrecio">
+  <div class="col-12">
+    <!-- Header de contexto compacto con selector -->
+    <div class="header-card">
+      <div class="header-content">
+        <div class="header-info">
+          <div class="breadcrumb-section">
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb breadcrumb-custom">
+                <li class="breadcrumb-item">
+                  <a href="#" (click)="volverAListas(); $event.preventDefault()" class="breadcrumb-link">
+                    <i class="feather icon-home"></i> Listas de Precios
+                  </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                  <i class="feather icon-tag"></i> {{ listaPrecio.nombre }}
+                </li>
+              </ol>
+            </nav>
+          </div>
+
+          <div class="title-section">
+            <h3 class="main-title">
+              <i class="feather icon-dollar-sign title-icon"></i>
+              {{ listaPrecio.nombre }}
+            </h3>
+            <p class="subtitle" *ngIf="listaPrecio.descripcion">{{ listaPrecio.descripcion }}</p>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="feather icon-dollar-sign"></i>
+              </div>
+              <div class="info-content">
+                <span class="info-label">Moneda</span>
+                <span class="info-value">{{ listaPrecio.moneda }}</span>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="feather icon-calendar"></i>
+              </div>
+              <div class="info-content">
+                <span class="info-label">Vigencia</span>
+                <span class="info-value">{{ formatDate(listaPrecio.vigenciaDesde) }} - {{ formatDate(listaPrecio.vigenciaHasta) }}</span>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="feather icon-activity"></i>
+              </div>
+              <div class="info-content">
+                <span class="info-label">Estado</span>
+                <span class="badge-custom {{ getEstadoBadge(listaPrecio.activa) }}">
+                  <i class="feather {{ getIconClass(listaPrecio.activa) }}"></i>
+                  {{ getEstadoText(listaPrecio.activa) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="header-toolbar">
+            <div class="selector-group compact">
+              <label class="selector-label">
+                <i class="feather icon-list"></i>
+                Servicio
+              </label>
+              <div class="select-wrapper">
+                <select class="form-control custom-select" [ngModel]="selectedServicioId()" (ngModelChange)="onServicioChange($event)">
+                  <option [value]="0">
+                    <i class="feather {{ getChevronIcon() }}"></i> Seleccione un servicio...
+                  </option>
+                  <option *ngFor="let servicio of servicios" [value]="servicio.id">
+                    <i class="feather {{ getServicioIcon() }}"></i> {{ servicio.nombre }}
+                  </option>
+                </select>
+                <div class="select-arrow">
+                  <i class="feather icon-chevron-down"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="header-actions">
+              <button class="btn btn-primary btn-action" (click)="openForm()">
+                <i class="feather icon-plus"></i>
+                <span>Agregar Regla</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de Reglas Tarifarias -->
+    <div class="rules-table-container" *ngIf="selectedServicioId() > 0">
+      <div class="table-header">
+        <h6 class="table-title">
+          <i class="feather icon-list"></i>
+          Reglas Tarifarias - {{ getServicioNombre(selectedServicioId()) }}
+        </h6>
+ 
+      </div>
+
+      <div class="table-responsive" *ngIf="reglasFiltradas().length > 0; else noReglas">
+        <table class="table table-custom">
+          <thead class="table-header-custom">
+            <tr>
+              <th class="col-tarifa">
+                <i class="feather icon-tag"></i>
+                Tarifa
+              </th>
+              <th class="col-horario">
+                <i class="feather icon-clock"></i>
+                Horario
+              </th>
+              <th class="col-precio">
+                <i class="feather icon-dollar-sign"></i>
+                Precio Base
+              </th>
+              <th class="col-adultos">
+                <i class="feather icon-users"></i>
+                Incluye
+              </th>
+              <th class="col-extra">
+                <i class="feather icon-user-plus"></i>
+                Adulto Extra
+              </th>
+              <th class="col-nino">
+                <i class="feather icon-user"></i>
+                Nino
+              </th>
+              <th class="col-observaciones">
+                <i class="feather icon-message-square"></i>
+                Notas
+              </th>
+              <th class="col-estado">
+                <i class="feather icon-activity"></i>
+                Estado
+              </th>
+              <th class="col-acciones">
+                <i class="feather icon-settings"></i>
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let regla of reglasFiltradas()" class="table-row">
+              <td class="col-tarifa">
+                <span class="badge-tarifa">{{ regla.tarifa }}</span>
+              </td>
+              <td class="col-horario">
+                <div class="time-range">
+                  <i class="feather icon-clock time-icon"></i>
+                  <span>{{ regla.horaInicio }} - {{ regla.horaFin }}</span>
+                </div>
+              </td>
+              <td class="col-precio">
+                <div class="price-display">
+                  <span class="currency">{{ listaPrecio.moneda }}</span>
+                  <span class="amount">{{ regla.precioBase | number }}</span>
+                </div>
+              </td>
+              <td class="col-adultos">
+                <div class="adults-info">
+                  <i class="feather icon-users"></i>
+                  <span>{{ regla.adultosIncluidos }}</span>
+                </div>
+              </td>
+              <td class="col-extra">
+                <div class="price-display">
+                  <span class="currency">{{ listaPrecio.moneda }}</span>
+                  <span class="amount">{{ regla.precioAdultoExtra | number }}</span>
+                </div>
+              </td>
+              <td class="col-nino">
+                <div class="price-display">
+                  <span class="currency">{{ listaPrecio.moneda }}</span>
+                  <span class="amount">{{ regla.precioNino | number }}</span>
+                </div>
+              </td>
+              <td class="col-observaciones">
+                <div class="notes-cell">
+                  <span class="notes-text" [title]="regla.observaciones">
+                    {{ regla.observaciones || 'Sin observaciones' }}
+                  </span>
+                </div>
+              </td>
+              <td class="col-estado">
+                <span class="badge-status {{ getEstadoBadge(regla.activa) }}">
+                  <i class="feather {{ getIconClass(regla.activa) }}"></i>
+                  {{ getEstadoText(regla.activa) }}
+                </span>
+              </td>
+              <td class="col-acciones">
+                <div class="action-buttons">
+                  <button class="btn-action btn-edit" (click)="openForm(regla)"
+                          title="Editar regla" data-toggle="tooltip">
+                    <i class="feather icon-edit-2"></i>
+                  </button>
+                  <button class="btn-action btn-toggle" (click)="toggleActive(regla.id)"
+                          [title]="getToggleTitle(regla.activa)" data-toggle="tooltip">
+                    <i class="feather {{ getPausePlayIcon(regla.activa) }}"></i>
+                  </button>
+                  <button class="btn-action btn-delete" (click)="deleteRegla(regla.id)"
+                          title="Eliminar regla" data-toggle="tooltip">
+                    <i class="feather icon-trash-2"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #noReglas>
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <i class="feather icon-file-text"></i>
+          </div>
+          <h5 class="empty-state-title">No hay reglas tarifarias configuradas</h5>
+          <p class="empty-state-description">
+            Este servicio aun no tiene reglas de precio definidas.
+            Crea la primera regla para comenzar a configurar los precios.
+          </p>
+          <button class="btn btn-primary btn-empty-action" (click)="openForm()">
+            <i class="feather icon-plus"></i>
+            Crear Primera Regla
+          </button>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para formulario -->
+<div class="modal fade" [ngClass]="{'show': showForm, 'd-block': showForm}" *ngIf="showForm" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ editingRegla ? 'Editar Regla Tarifaria' : 'Nueva Regla Tarifaria' }}</h5>
+        <button type="button" class="close" (click)="closeForm()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <app-regla-tarifa-form
+          [reglaTarifa]="editingRegla"
+          [listaPrecio]="listaPrecio"
+          [servicioId]="selectedServicioId()"
+          (onSave)="onFormSave()"
+          (onCancel)="closeForm()">
+        </app-regla-tarifa-form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal backdrop -->
+<div class="modal-backdrop fade show" *ngIf="showForm"></div>
+
+<!-- Boton flotante para volver -->
+<button class="btn btn-secondary btn-flotante-volver" (click)="volverAListas()" title="Volver a Listas de Precios">
+  <i class="feather icon-arrow-left"></i>
+</button>

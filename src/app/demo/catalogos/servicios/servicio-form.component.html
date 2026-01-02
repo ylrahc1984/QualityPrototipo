@@ -1,0 +1,118 @@
+<div class="row justify-content-center">
+  <div class="col-lg-12 col-md-12">
+    <app-card [customHeader]="true">
+      <div class="app-card-header">
+        <h5 class="mb-0">
+          <i class="feather icon-plus-circle mr-2"></i>
+          {{ title }}
+        </h5>
+        <div class="card-header-right">
+          <button class="btn btn-outline-secondary btn-sm" routerLink="/servicios">
+            <i class="feather icon-arrow-left"></i> Volver
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <form class="servicio-form">
+            <div class="form-section">
+              <h6 class="section-title">
+                <i class="feather icon-info"></i>
+                Información General
+              </h6>
+              <div class="row">
+                <div class="col-md-8">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="feather icon-tag"></i>
+                      Nombre del Servicio *
+                    </label>
+                    <input type="text" class="form-control form-control-lg" [(ngModel)]="servicio.nombre" name="nombre" required
+                           placeholder="Ingrese el nombre del servicio">
+                    <small class="form-text text-muted">Nombre descriptivo del servicio</small>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="feather icon-list"></i>
+                      Tipo de Servicio *
+                    </label>
+                    <select class="form-control form-control-lg" [(ngModel)]="servicio.tipo" name="tipo" required>
+                      <option value="transporte">🚗 Transporte</option>
+                      <option value="tour">🏔️ Tour</option>
+                      <option value="alojamiento">🏨 Alojamiento</option>
+                      <option value="otro">📋 Otro</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">
+                  <i class="feather icon-file-text"></i>
+                  Descripción
+                </label>
+                <textarea class="form-control" [(ngModel)]="servicio.descripcion" name="descripcion" rows="4"
+                          placeholder="Describa detalladamente el servicio..."></textarea>
+                <small class="form-text text-muted">Proporcione una descripción completa del servicio</small>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h6 class="section-title">
+                <i class="feather icon-dollar-sign"></i>
+                Información de Precios
+              </h6>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="feather icon-dollar-sign"></i>
+                      Precio Base
+                    </label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">₡</span>
+                      </div>
+                      <input type="number" class="form-control form-control-lg" [(ngModel)]="servicio.precio" name="precio"
+                             placeholder="0" min="0" step="0.01">
+                    </div>
+                    <small class="form-text text-muted">Precio base en colones costarricenses</small>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="feather icon-toggle-right"></i>
+                      Estado del Servicio
+                    </label>
+                    <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input" [(ngModel)]="servicio.activo" name="activo" id="activoSwitch">
+                      <label class="custom-control-label" for="activoSwitch">
+                        {{ servicio.activo ? 'Servicio Activo' : 'Servicio Inactivo' }}
+                      </label>
+                    </div>
+                    <small class="form-text text-muted">
+                      {{ servicio.activo ? 'El servicio estará disponible para reservas' : 'El servicio no estará disponible' }}
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-success btn-lg mr-3" (click)="saveServicio()">
+                <i class="feather icon-save"></i>
+                {{ isEdit ? 'Actualizar Servicio' : 'Crear Servicio' }}
+              </button>
+              <button type="button" class="btn btn-outline-secondary btn-lg" (click)="cancel()">
+                <i class="feather icon-x"></i>
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </app-card>
+  </div>
+</div>

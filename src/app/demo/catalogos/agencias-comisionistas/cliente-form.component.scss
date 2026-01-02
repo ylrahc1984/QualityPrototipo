@@ -1,0 +1,20 @@
+/* Estilos compactos para el formulario de clientes */
+.cliente-form .section-title {
+  font-weight: 600;
+  margin: 0.75rem 0 0.5rem;
+  color: #495057;
+}
+
+.cliente-form .form-group {
+  margin-bottom: 0.75rem;
+}
+
+.cliente-form input,
+.cliente-form select {
+  font-size: 0.9rem;
+  padding: 0.55rem 0.75rem;
+}
+
+.cliente-form .form-check {
+  margin-top: 0.4rem;
+}

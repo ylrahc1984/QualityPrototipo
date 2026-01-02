@@ -1,0 +1,87 @@
+<div class="tipo-cambio-wrapper">
+  <div class="page-header">
+    <div>
+      <h4 class="title">Tipo de Cambio</h4>
+      <p class="subtitle">Consulta diaria y historial de tipos de cambio.</p>
+    </div>
+  </div>
+
+  <div class="card-highlight" *ngIf="tipoCambioActual() as actual">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <span class="small-label">Fecha</span>
+          <div class="value">{{ actual.fecha | date:'dd/MM/yyyy' }}</div>
+        </div>
+        <div class="text-right">
+          <span class="badge badge-primary">{{ actual.monedaBase }} → {{ actual.monedaReferencia }}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-2">
+          <div class="metric">
+            <span class="small-label">Compra</span>
+            <div class="value text-success">{{ actual.compra | number:'1.2-4' }}</div>
+          </div>
+        </div>
+        <div class="col-md-6 mb-2">
+          <div class="metric">
+            <span class="small-label">Venta</span>
+            <div class="value text-primary">{{ actual.venta | number:'1.2-4' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters-card">
+    <div class="row align-items-end">
+      <div class="col-md-4 mb-3">
+        <label class="small-label">Desde</label>
+        <input type="date" class="form-control" [ngModel]="fechaDesde()" (ngModelChange)="fechaDesde.set($event)">
+      </div>
+      <div class="col-md-4 mb-3">
+        <label class="small-label">Hasta</label>
+        <input type="date" class="form-control" [ngModel]="fechaHasta()" (ngModelChange)="fechaHasta.set($event)">
+      </div>
+      <div class="col-md-4 mb-3 text-right">
+        <button class="btn btn-light btn-sm" (click)="clearFilters()">
+          <i class="feather icon-x"></i> Limpiar filtros
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <h6 class="m-0"><i class="feather icon-activity"></i> Historial</h6>
+      <span class="count-chip">{{ historialFiltrado().length }} registros</span>
+    </div>
+    <div class="table-responsive" *ngIf="historialFiltrado().length; else noData">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Moneda</th>
+            <th>Compra</th>
+            <th>Venta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of historialFiltrado()">
+            <td>{{ item.fecha | date:'dd/MM/yyyy' }}</td>
+            <td><span class="badge badge-info">{{ item.monedaBase }} → {{ item.monedaReferencia }}</span></td>
+            <td>{{ item.compra | number:'1.2-4' }}</td>
+            <td>{{ item.venta | number:'1.2-4' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ng-template #noData>
+      <div class="empty-state text-center p-4">
+        <i class="feather icon-archive empty-icon"></i>
+        <p class="mb-2">No hay registros en el rango seleccionado.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>

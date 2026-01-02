@@ -1,0 +1,447 @@
+<div class="row">
+  <div class="col-12">
+    <app-card cardTitle="Reserva">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h5 class="mb-1">Nueva Reserva</h5>
+          <p class="text-muted mb-0">Información general y servicios</p>
+        </div>
+        <button class="btn btn-outline-secondary" (click)="cancelar()">
+          <i class="feather icon-chevron-left"></i> Volver
+        </button>
+      </div>
+
+      <div *ngIf="guardado" class="alert alert-success" role="alert">
+        Reserva creada correctamente. Agregue los servicios.
+      </div>
+
+      <form #reservaForm="ngForm">
+        <h6 class="mb-3">Información General</h6>
+        <div class="row">
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Número de Reserva / Boleta</label>
+            <input type="text" class="form-control" [value]="form.numeroBoleta" readonly>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Fecha de Reserva</label>
+            <input type="date" class="form-control" [(ngModel)]="form.fecha" name="fecha" required>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Cliente Final <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="form.clienteFinal" name="clienteFinal" required placeholder="Nombre del pasajero principal">
+            <div class="text-danger small" *ngIf="reservaForm.submitted && reservaForm.controls.clienteFinal?.invalid">
+              Cliente Final es requerido.
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Agencia / Comisionista <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" [(ngModel)]="form.agencia" name="agencia" required placeholder="Seleccione o ingrese agencia">
+            <div class="text-danger small" *ngIf="reservaForm.submitted && reservaForm.controls.agencia?.invalid">
+              Agencia / Comisionista es requerida.
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Idioma</label>
+            <select class="form-control" [(ngModel)]="form.idioma" name="idioma">
+              <option *ngFor="let idioma of idiomas" [ngValue]="idioma">{{ idioma }}</option>
+            </select>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Forma de Reservación <span class="text-danger">*</span></label>
+            <select class="form-control" [(ngModel)]="form.formaReservacion" name="formaReservacion" required>
+              <option *ngFor="let forma of formasReservacion" [ngValue]="forma">{{ forma }}</option>
+            </select>
+            <div class="text-danger small" *ngIf="reservaForm.submitted && reservaForm.controls.formaReservacion?.invalid">
+              Forma de Reservación es requerida.
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Forma de Pago <span class="text-danger">*</span></label>
+            <select class="form-control" [(ngModel)]="form.formaPago" name="formaPago" required>
+              <option *ngFor="let forma of formasPago" [ngValue]="forma">{{ forma }}</option>
+            </select>
+            <div class="text-danger small" *ngIf="reservaForm.submitted && reservaForm.controls.formaPago?.invalid">
+              Forma de Pago es requerida.
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <label class="form-label">Estado de la Reserva</label>
+            <select class="form-control" [(ngModel)]="form.estado" name="estado" disabled>
+              <option>Pendiente</option>
+              <option>Confirmada</option>
+              <option>Cancelada</option>
+            </select>
+            <small class="form-text text-muted">Al guardar se crea Pendiente; usar "Guardar y Confirmar" para marcar Confirmada.</small>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 mb-3">
+            <label class="form-label">Comentarios generales</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="form.comentarios" name="comentarios" placeholder="Notas u observaciones"></textarea>
+          </div>
+        </div>
+
+        <hr>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0">Detalle de Servicios</h6>
+          <button type="button" class="btn btn-primary btn-sm" (click)="abrirModalDetalle()">
+            <i class="feather icon-plus"></i> Agregar Servicio
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover mb-2">
+            <thead>
+              <tr>
+                <th>Servicio</th>
+                <th>Fecha</th>
+                <th>Origen (Lugar)</th>
+                <th>Ubic. Origen (Zona / Mapa)</th>
+                <th>Destino (Lugar)</th>
+                <th>Ubic. Destino (Zona / Mapa)</th>
+                <th>Pax</th>
+                <th>Tarifa</th>
+                <th>Costo Rack</th>
+                <th>Costo Neto</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let detalle of detalles">
+                <td>{{ detalle.servicio }}</td>
+                <td>{{ detalle.fechaServicio }}</td>
+                <td>
+                  <div>{{ detalle.origenLugar }}</div>
+                  <div class="text-muted small" *ngIf="detalle.origenDireccionGoogle">Exacta: {{ detalle.origenDireccionGoogle }}</div>
+                </td>
+                <td>
+                  <div>{{ detalle.origenZona }}</div>
+                  <a
+                    *ngIf="getDetalleMapsLink(detalle, 'origen')"
+                    class="text-primary small d-inline-flex align-items-center"
+                    [href]="getDetalleMapsLink(detalle, 'origen')"
+                    target="_blank"
+                    rel="noopener"
+                    title="Ver origen en Google Maps"
+                  >
+                    <i class="feather icon-map-pin mr-1"></i>Mapa
+                  </a>
+                </td>
+                <td>
+                  <div>{{ detalle.destinoLugar }}</div>
+                  <div class="text-muted small" *ngIf="detalle.destinoDireccionGoogle">Exacta: {{ detalle.destinoDireccionGoogle }}</div>
+                </td>
+                <td>
+                  <div>{{ detalle.destinoZona }}</div>
+                  <a
+                    *ngIf="getDetalleMapsLink(detalle, 'destino')"
+                    class="text-primary small d-inline-flex align-items-center"
+                    [href]="getDetalleMapsLink(detalle, 'destino')"
+                    target="_blank"
+                    rel="noopener"
+                    title="Ver destino en Google Maps"
+                  >
+                    <i class="feather icon-map-pin mr-1"></i>Mapa
+                  </a>
+                </td>
+                <td>{{ detalle.adultos }} / {{ detalle.ninos }}</td>
+                <td>{{ detalle.tarifa }}</td>
+                <td>{{ detalle.costoRack | number:'1.0-0' }}</td>
+                <td>{{ detalle.costoNeto | number:'1.0-0' }}</td>
+                <td>
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-info" type="button" (click)="editarDetalle(detalle)">
+                      <i class="feather icon-edit"></i>
+                    </button>
+                    <button class="btn btn-outline-danger" type="button" (click)="eliminarDetalle(detalle.id)">
+                      <i class="feather icon-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="detalles.length === 0">
+                <td colspan="11" class="text-center text-muted">Aún no hay servicios agregados.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="row mt-3">
+          <div class="col-md-4">
+            <div class="card shadow-none border">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <span>Total Neto</span>
+                  <strong>{{ totalNeto | number:'1.0-0' }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                  <span>Total Rack</span>
+                  <strong>{{ totalRack | number:'1.0-0' }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                  <span>Cantidad de Servicios</span>
+                  <strong>{{ cantidadServicios }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-right mt-3">
+          <button type="button" class="btn btn-outline-secondary mr-2" (click)="cancelar()">Cancelar</button>
+          <button type="button" class="btn btn-success mr-2" (click)="guardarReserva(true, reservaForm)">Guardar y Confirmar</button>
+          <button type="button" class="btn btn-primary" (click)="guardarReserva(false, reservaForm)">Guardar Reserva</button>
+        </div>
+      </form>
+    </app-card>
+  </div>
+</div>
+
+<!-- Modal detalle servicio -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'show': showDetalleModal}" *ngIf="showDetalleModal" style="display: block;">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ editingDetalleId ? 'Editar Servicio' : 'Agregar Servicio' }}</h5>
+        <button type="button" class="close" aria-label="Close" (click)="cerrarModalDetalle()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form #detalleFormRef="ngForm" (ngSubmit)="guardarDetalle(detalleFormRef)">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Servicio <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" [(ngModel)]="detalleForm.servicio" name="servicio" required placeholder="Seleccione servicio">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Fecha del Servicio <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" [(ngModel)]="detalleForm.fechaServicio" name="fechaServicio" required>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Tarifa</label>
+              <select class="form-control" [(ngModel)]="detalleForm.tarifa" name="tarifa" (change)="recalcularCosto()">
+                <option *ngFor="let t of tarifas" [ngValue]="t">{{ t }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Hora Pick-Up</label>
+              <input type="time" class="form-control" [(ngModel)]="detalleForm.horaPickup" name="horaPickup">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Hora Inicio</label>
+              <input type="time" class="form-control" [(ngModel)]="detalleForm.horaInicio" name="horaInicio">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Adultos</label>
+              <input type="number" min="0" class="form-control" [(ngModel)]="detalleForm.adultos" name="adultos" (input)="recalcularCosto()">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Ninos</label>
+              <input type="number" min="0" class="form-control" [(ngModel)]="detalleForm.ninos" name="ninos" (input)="recalcularCosto()">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12 d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">Origen</h6>
+              <span class="badge badge-light-primary">Google Places Autocomplete</span>
+            </div>
+            <div class="col-12">
+              <div class="card shadow-none border mb-3">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Origen (Lugar) <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control" [(ngModel)]="detalleForm.origenLugar" name="origenLugar" required placeholder="Hotel, aeropuerto, etc.">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Ubicacion Origen (Zona) <span class="text-danger">*</span></label>
+                      <select class="form-control" [(ngModel)]="detalleForm.origenZona" name="origenZona" required (change)="recalcularCosto()">
+                        <option value="">Seleccione zona</option>
+                        <option *ngFor="let zona of zonas" [ngValue]="zona">{{ zona }}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label">Ubicacion Exacta de Recojo (Google Maps)</label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="feather icon-map-pin"></i></span>
+                      </div>
+                      <input
+                        type="text"
+                        class="form-control"
+                        [(ngModel)]="detalleForm.origenDireccionGoogle"
+                        name="origenDireccionGoogle"
+                        placeholder="Buscar ubicacion exacta en Google Maps"
+                        autocomplete="off"
+                        appGooglePlacesAutocomplete
+                        [componentRestrictions]="{ country: 'cr' }"
+                        [types]="['establishment']"
+                        (placeSelected)="onPlaceSelected('origen', $event)"
+                        (placeSelectionError)="onPlaceSelectionError('origen', $event)"
+                      >
+                    </div>
+                    <small class="form-text text-muted">
+                      Recomendado: seleccione la ubicacion exacta para guiar al transportista.
+                    </small>
+                    <div class="text-danger small mt-1" *ngIf="origenAutocompleteMessage">
+                      {{ origenAutocompleteMessage }}
+                    </div>
+                    <div class="card shadow-none border mt-2" *ngIf="detalleForm.origenPlaceId">
+                      <div class="card-body p-3">
+                        <div class="d-flex align-items-start">
+                          <i class="feather icon-map-pin text-primary mr-2"></i>
+                          <div>
+                            <div class="font-weight-bold">{{ detalleForm.origenDireccionGoogle }}</div>
+                            <div class="text-muted small">Lat: {{ detalleForm.origenLat }} - Lng: {{ detalleForm.origenLng }}</div>
+                            <div class="text-muted small">Place ID: {{ detalleForm.origenPlaceId }}</div>
+                          </div>
+                        </div>
+                        <div class="mt-2 d-flex align-items-center flex-wrap">
+                          <a
+                            class="btn btn-outline-primary btn-sm mr-2 mb-2"
+                            [attr.href]="getMapsLink('origen') || null"
+                            [attr.target]="getMapsLink('origen') ? '_blank' : null"
+                            [attr.rel]="getMapsLink('origen') ? 'noopener' : null"
+                            [class.disabled]="!getMapsLink('origen')"
+                          >
+                            <i class="feather icon-external-link"></i> Ver en Google Maps
+                          </a>
+                          <button
+                            type="button"
+                            class="btn btn-outline-secondary btn-sm mr-2 mb-2"
+                            (click)="copyMapsLink('origen')"
+                            [disabled]="!getMapsLink('origen')"
+                          >
+                            <i class="feather icon-copy"></i> Copiar enlace
+                          </button>
+                          <small class="text-success mr-2 mb-0" *ngIf="copiedLink === 'origen'">Enlace copiado</small>
+                          <small class="text-danger mb-0" *ngIf="copyError && copyErrorTarget === 'origen'">
+                            {{ copyError }}
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12 d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">Destino</h6>
+              <span class="badge badge-light-primary">Google Places Autocomplete</span>
+            </div>
+            <div class="col-12">
+              <div class="card shadow-none border mb-3">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Destino (Lugar) <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control" [(ngModel)]="detalleForm.destinoLugar" name="destinoLugar" required placeholder="Hotel, lodge, etc.">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Ubicacion Destino (Zona) <span class="text-danger">*</span></label>
+                      <select class="form-control" [(ngModel)]="detalleForm.destinoZona" name="destinoZona" required (change)="recalcularCosto()">
+                        <option value="">Seleccione zona</option>
+                        <option *ngFor="let zona of zonas" [ngValue]="zona">{{ zona }}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="mb-2">
+                    <label class="form-label">Ubicacion Exacta de Entrega (Google Maps)</label>
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="feather icon-map-pin"></i></span>
+                      </div>
+                      <input
+                        type="text"
+                        class="form-control"
+                        [(ngModel)]="detalleForm.destinoDireccionGoogle"
+                        name="destinoDireccionGoogle"
+                        placeholder="Buscar ubicacion exacta en Google Maps"
+                        autocomplete="off"
+                        appGooglePlacesAutocomplete
+                        [componentRestrictions]="{ country: 'cr' }"
+                        [types]="['establishment']"
+                        (placeSelected)="onPlaceSelected('destino', $event)"
+                        (placeSelectionError)="onPlaceSelectionError('destino', $event)"
+                      >
+                    </div>
+                    <small class="form-text text-muted">
+                      Recomendado: seleccione la ubicacion exacta para guiar al transportista.
+                    </small>
+                    <div class="text-danger small mt-1" *ngIf="destinoAutocompleteMessage">
+                      {{ destinoAutocompleteMessage }}
+                    </div>
+                    <div class="card shadow-none border mt-2" *ngIf="detalleForm.destinoPlaceId">
+                      <div class="card-body p-3">
+                        <div class="d-flex align-items-start">
+                          <i class="feather icon-map-pin text-primary mr-2"></i>
+                          <div>
+                            <div class="font-weight-bold">{{ detalleForm.destinoDireccionGoogle }}</div>
+                            <div class="text-muted small">Lat: {{ detalleForm.destinoLat }} - Lng: {{ detalleForm.destinoLng }}</div>
+                            <div class="text-muted small">Place ID: {{ detalleForm.destinoPlaceId }}</div>
+                          </div>
+                        </div>
+                        <div class="mt-2 d-flex align-items-center flex-wrap">
+                          <a
+                            class="btn btn-outline-primary btn-sm mr-2 mb-2"
+                            [attr.href]="getMapsLink('destino') || null"
+                            [attr.target]="getMapsLink('destino') ? '_blank' : null"
+                            [attr.rel]="getMapsLink('destino') ? 'noopener' : null"
+                            [class.disabled]="!getMapsLink('destino')"
+                          >
+                            <i class="feather icon-external-link"></i> Ver en Google Maps
+                          </a>
+                          <button
+                            type="button"
+                            class="btn btn-outline-secondary btn-sm mr-2 mb-2"
+                            (click)="copyMapsLink('destino')"
+                            [disabled]="!getMapsLink('destino')"
+                          >
+                            <i class="feather icon-copy"></i> Copiar enlace
+                          </button>
+                          <small class="text-success mr-2 mb-0" *ngIf="copiedLink === 'destino'">Enlace copiado</small>
+                          <small class="text-danger mb-0" *ngIf="copyError && copyErrorTarget === 'destino'">
+                            {{ copyError }}
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Costo Neto</label>
+              <input type="number" class="form-control" [(ngModel)]="detalleForm.costoNeto" name="costoNeto" readonly>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Costo Rack</label>
+              <input type="number" class="form-control" [(ngModel)]="detalleForm.costoRack" name="costoRack" readonly>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label">Observaciones</label>
+              <textarea class="form-control" rows="1" [(ngModel)]="detalleForm.observaciones" name="observaciones"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModalDetalle()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Servicio</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

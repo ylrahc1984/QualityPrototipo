@@ -1,0 +1,168 @@
+<div class="row">
+  <div class="col-12">
+    <app-card cardTitle="Ordenes de Trabajo">
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+          <h5 class="mb-1">Ordenes de Trabajo</h5>
+          <p class="mb-0 text-muted">Listado general de ordenes generadas desde las reservas y asignadas a suplidores.</p>
+        </div>
+        <button class="btn btn-primary" (click)="nuevaOrden()">
+          <i class="feather icon-plus"></i> Nueva Orden de Trabajo
+        </button>
+      </div>
+
+      <div class="row align-items-end mb-3">
+        <div class="col-md-3 mb-2">
+          <label class="form-label small text-muted">Numero de Orden</label>
+          <input type="text" class="form-control" [(ngModel)]="filtros.numeroOrden" (input)="applyFilters()" placeholder="Ej: 2025002">
+        </div>
+        <div class="col-md-2 mb-2">
+          <label class="form-label small text-muted">Fecha desde</label>
+          <input type="date" class="form-control" [(ngModel)]="filtros.fechaDesde" (change)="applyFilters()">
+        </div>
+        <div class="col-md-2 mb-2">
+          <label class="form-label small text-muted">Fecha hasta</label>
+          <input type="date" class="form-control" [(ngModel)]="filtros.fechaHasta" (change)="applyFilters()">
+        </div>
+        <div class="col-md-3 mb-2">
+          <label class="form-label small text-muted">Suplidor</label>
+          <select class="form-control" [(ngModel)]="filtros.suplidor" (change)="applyFilters()">
+            <option value="">Todos</option>
+            <option *ngFor="let suplidor of suplidores" [ngValue]="suplidor">{{ suplidor }}</option>
+          </select>
+        </div>
+        <div class="col-md-2 mb-2">
+          <label class="form-label small text-muted">Estado de la Orden</label>
+          <select class="form-control" [(ngModel)]="filtros.estado" (change)="applyFilters()">
+            <option value="">Todos</option>
+            <option *ngFor="let estado of estadosDisponibles" [ngValue]="estado">{{ estado }}</option>
+          </select>
+        </div>
+        <div class="col-md-3 mb-2">
+          <label class="form-label small text-muted">Ruta / Zona (opcional)</label>
+          <input type="text" class="form-control" [(ngModel)]="filtros.rutaZona" (input)="applyFilters()" placeholder="Ej: San Jose - Jaco">
+        </div>
+        <div class="col-md-3 mb-2">
+          <label class="form-label small text-muted">Agencia (opcional)</label>
+          <select class="form-control" [(ngModel)]="filtros.agencia" (change)="applyFilters()">
+            <option value="">Todas</option>
+            <option *ngFor="let agencia of agencias" [ngValue]="agencia">{{ agencia }}</option>
+          </select>
+        </div>
+        <div class="col-md-2 mb-2 d-flex filters-reset">
+          <button class="btn btn-link text-secondary ml-auto" type="button" (click)="resetFilters()">
+            Limpiar filtros
+          </button>
+        </div>
+      </div>
+
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+        <div class="text-muted small">
+          Mostrando <strong>{{ ordenesFiltradas.length }}</strong> de <strong>{{ ordenes.length }}</strong> ordenes
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>No. Orden</th>
+              <th>Fecha de Servicio</th>
+              <th>Suplidor</th>
+              <th>Ruta / Zona</th>
+              <th>Cantidad de Servicios</th>
+              <th>Total Pax</th>
+              <th>Total a Pagar</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let orden of ordenesPaginadas; trackBy: trackByOrdenId">
+              <td>
+                <div class="font-weight-bold">#{{ orden.numeroOrden }}</div>
+                <small class="text-muted">ID {{ orden.id }}</small>
+              </td>
+              <td>{{ orden.fechaServicio }}</td>
+              <td>{{ orden.suplidor }}</td>
+              <td>{{ orden.ruta || 'N/D' }}</td>
+              <td>
+                <span class="badge badge-pill bg-light text-dark border">
+                  <i class="feather icon-layers mr-1"></i>
+                  {{ orden.detalles.length }} servicio{{ orden.detalles.length > 1 ? 's' : '' }}
+                </span>
+              </td>
+              <td>
+                <span class="badge badge-pill bg-info text-white">
+                  <i class="feather icon-users mr-1"></i>
+                  {{ orden.totalPax }} pax
+                </span>
+              </td>
+              <td>CRC {{ orden.totalPagar | number:'1.0-0' }}</td>
+              <td>
+                <span class="badge badge-pill estado-badge" [ngClass]="getEstadoBadge(orden.estado)">{{ orden.estado }}</span>
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm action-buttons" role="group" aria-label="Acciones">
+                  <button class="btn btn-outline-info" (click)="verEditar(orden)" title="Ver / Editar">
+                    <i class="feather icon-edit"></i>
+                  </button>
+                  <button class="btn btn-outline-secondary" (click)="imprimirOrden(orden)" title="Imprimir Orden de Trabajo">
+                    <i class="feather icon-printer"></i>
+                  </button>
+                  <div ngbDropdown class="btn-group btn-group-sm" display="static">
+                    <button class="btn btn-outline-primary dropdown-toggle" ngbDropdownToggle title="Cambiar Estado">
+                      <i class="feather icon-refresh-cw"></i>
+                    </button>
+                    <div ngbDropdownMenu>
+                      <button
+                        ngbDropdownItem
+                        *ngFor="let estado of estadosDisponibles"
+                        (click)="cambiarEstado(orden, estado)"
+                        [disabled]="orden.estado === estado">
+                        {{ estado }}
+                      </button>
+                    </div>
+                  </div>
+                  <button class="btn btn-outline-danger" (click)="anularOrden(orden)" title="Anular Orden">
+                    <i class="feather icon-x-circle"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="ordenesFiltradas.length === 0">
+              <td colspan="9" class="text-center text-muted">No se encontraron ordenes con los filtros aplicados.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex flex-wrap justify-content-between align-items-center mt-3" *ngIf="ordenesFiltradas.length">
+        <div class="form-inline mb-2">
+          <label class="mr-2 mb-0">Mostrar</label>
+          <select class="form-control" [ngModel]="pageSize" (ngModelChange)="changePageSize($event)">
+            <option *ngFor="let size of pageSizeOptions" [ngValue]="size">{{ size }}</option>
+          </select>
+          <span class="ml-2">por pagina</span>
+        </div>
+        <div class="mb-2 text-muted">
+          Mostrando
+          <strong>{{ pageStart }}</strong>
+          -
+          <strong>{{ pageEnd }}</strong>
+          de
+          <strong>{{ ordenesFiltradas.length }}</strong>
+        </div>
+        <div class="btn-group mb-2" role="group">
+          <button class="btn btn-light" (click)="prevPage()" [disabled]="currentPage === 1">
+            <i class="feather icon-chevron-left"></i>
+          </button>
+          <button class="btn btn-light" disabled>Pagina {{ currentPage }} / {{ totalPages }}</button>
+          <button class="btn btn-light" (click)="nextPage()" [disabled]="currentPage === totalPages">
+            <i class="feather icon-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </app-card>
+  </div>
+</div>

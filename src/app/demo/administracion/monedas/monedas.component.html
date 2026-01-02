@@ -1,0 +1,342 @@
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h4 class="mb-1">
+            <i class="feather icon-dollar-sign me-2"></i>
+            Gestión de Monedas
+          </h4>
+          <p class="text-muted mb-0">Administra las monedas disponibles en el sistema</p>
+        </div>
+        <button type="button" class="btn btn-primary" (click)="createNewMoneda()">
+          <i class="feather icon-plus me-1"></i>
+          Nueva Moneda
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros y búsqueda -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="feather icon-search"></i>
+                </span>
+                <input type="text"
+                       class="form-control"
+                       placeholder="Buscar por nombre, código o símbolo..."
+                       [(ngModel)]="searchTerm"
+                       (input)="onSearchChange()">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <select class="form-select"
+                      [(ngModel)]="statusFilter"
+                      (change)="onFilterChange()">
+                <option value="">Todos los estados</option>
+                <option value="active">Activas</option>
+                <option value="inactive">Inactivas</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <div class="d-flex align-items-center">
+                <small class="text-muted">
+                  {{ totalMonedas }} moneda{{ totalMonedas !== 1 ? 's' : '' }}
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de monedas -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="border-0">Código</th>
+                  <th class="border-0">Nombre</th>
+                  <th class="border-0">Símbolo</th>
+                  <th class="border-0">Decimales</th>
+                  <th class="border-0">Vista Previa</th>
+                  <th class="border-0">Estado</th>
+                  <th class="border-0">Base</th>
+                  <th class="border-0">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let moneda of getPaginatedMonedas(); trackBy: trackByFn">
+                  <td>
+                    <span class="badge bg-primary">{{ moneda.code }}</span>
+                  </td>
+                  <td>
+                    <strong>{{ moneda.name }}</strong>
+                  </td>
+                  <td>
+                    <span class="fs-5">{{ moneda.symbol }}</span>
+                  </td>
+                  <td>
+                    <small class="text-muted">{{ getDecimalLabel(moneda.decimalPlaces) }}</small>
+                  </td>
+                  <td>
+                    <code class="text-success">{{ generatePreview(moneda) }}</code>
+                  </td>
+                  <td>
+                    <span class="badge"
+                          [ngClass]="moneda.isActive ? 'bg-success' : 'bg-danger'">
+                      {{ moneda.isActive ? 'Activa' : 'Inactiva' }}
+                    </span>
+                  </td>
+                  <td>
+                    <i *ngIf="moneda.isBaseCurrency"
+                       class="feather icon-star text-warning"
+                       title="Moneda base"></i>
+                  </td>
+                  <td>
+                    <div class="btn-group" role="group">
+                      <button type="button"
+                              class="btn btn-sm btn-outline-primary"
+                              (click)="editMoneda(moneda)"
+                              title="Editar">
+                        <i class="feather icon-edit-2"></i>
+                      </button>
+                      <button type="button"
+                              class="btn btn-sm"
+                              [ngClass]="moneda.isActive ? 'btn-outline-warning' : 'btn-outline-success'"
+                              (click)="toggleStatus(moneda)"
+                              [title]="moneda.isActive ? 'Desactivar' : 'Activar'">
+                        <i class="feather" [ngClass]="moneda.isActive ? 'icon-pause' : 'icon-play'"></i>
+                      </button>
+                      <button type="button"
+                              *ngIf="!moneda.isBaseCurrency"
+                              class="btn btn-sm btn-outline-info"
+                              (click)="setAsBaseCurrency(moneda)"
+                              title="Establecer como base">
+                        <i class="feather icon-star"></i>
+                      </button>
+                      <button type="button"
+                              class="btn btn-sm btn-outline-danger"
+                              (click)="deleteMoneda(moneda)"
+                              title="Eliminar">
+                        <i class="feather icon-trash-2"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="getPaginatedMonedas().length === 0">
+                  <td colspan="8" class="text-center py-4">
+                    <div class="d-flex flex-column align-items-center">
+                      <i class="feather icon-dollar-sign fs-1 text-muted mb-2"></i>
+                      <span class="text-muted">No se encontraron monedas</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paginación -->
+  <div class="row mt-3" *ngIf="totalPages > 1">
+    <div class="col-12">
+      <nav aria-label="Paginación de monedas">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" [ngClass]="{ 'disabled': currentPage === 1 }">
+            <a class="page-link" href="#" (click)="goToPage(1); $event.preventDefault()">
+              <i class="feather icon-chevrons-left"></i>
+            </a>
+          </li>
+          <li class="page-item" [ngClass]="{ 'disabled': currentPage === 1 }">
+            <a class="page-link" href="#" (click)="goToPageRelative(-1); $event.preventDefault()">
+              <i class="feather icon-chevron-left"></i>
+            </a>
+          </li>
+          <li *ngFor="let page of getVisiblePages()"
+              class="page-item"
+              [ngClass]="{ 'active': page === currentPage, 'disabled': page === -1 }">
+            <a *ngIf="page !== -1"
+               class="page-link"
+               href="#"
+               (click)="goToPage(page); $event.preventDefault()">
+              {{ page }}
+            </a>
+            <span *ngIf="page === -1" class="page-link">...</span>
+          </li>
+          <li class="page-item" [ngClass]="{ 'disabled': currentPage === totalPages }">
+            <a class="page-link" href="#" (click)="goToPageRelative(1); $event.preventDefault()">
+              <i class="feather icon-chevron-right"></i>
+            </a>
+          </li>
+          <li class="page-item" [ngClass]="{ 'disabled': currentPage === totalPages }">
+            <a class="page-link" href="#" (click)="goToPage(totalPages); $event.preventDefault()">
+              <i class="feather icon-chevrons-right"></i>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para crear/editar moneda -->
+<div class="modal fade"
+     #monedaModal
+     tabindex="-1"
+     aria-labelledby="monedaModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="monedaModalLabel">
+          <i class="feather icon-dollar-sign me-2"></i>
+          {{ isEditing ? 'Editar' : 'Nueva' }} Moneda
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form #monedaForm="ngForm" (ngSubmit)="saveMoneda()">
+        <div class="modal-body" *ngIf="currentMoneda">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="code" class="form-label">
+                Código <span class="text-danger">*</span>
+              </label>
+              <input type="text"
+                     class="form-control"
+                     id="code"
+                     name="code"
+                     [(ngModel)]="currentMoneda.code"
+                     required
+                     #code="ngModel"
+                     [class.is-invalid]="code.invalid && code.touched"
+                     placeholder="USD, EUR, DOP..."
+                     maxlength="3"
+                     style="text-transform: uppercase;">
+              <div class="invalid-feedback" *ngIf="code.invalid && code.touched">
+                <small *ngIf="code.errors?.['required']">El código es obligatorio</small>
+              </div>
+              <small class="form-text text-muted">Código ISO de 3 letras (ej: USD)</small>
+            </div>
+            <div class="col-md-6">
+              <label for="symbol" class="form-label">
+                Símbolo <span class="text-danger">*</span>
+              </label>
+              <input type="text"
+                     class="form-control"
+                     id="symbol"
+                     name="symbol"
+                     [(ngModel)]="currentMoneda.symbol"
+                     required
+                     #symbol="ngModel"
+                     [class.is-invalid]="symbol.invalid && symbol.touched"
+                     placeholder="$, €, RD$..."
+                     maxlength="5">
+              <div class="invalid-feedback" *ngIf="symbol.invalid && symbol.touched">
+                <small *ngIf="symbol.errors?.['required']">El símbolo es obligatorio</small>
+              </div>
+            </div>
+            <div class="col-12">
+              <label for="name" class="form-label">
+                Nombre <span class="text-danger">*</span>
+              </label>
+              <input type="text"
+                     class="form-control"
+                     id="name"
+                     name="name"
+                     [(ngModel)]="currentMoneda.name"
+                     required
+                     #name="ngModel"
+                     [class.is-invalid]="name.invalid && name.touched"
+                     placeholder="Dólar Estadounidense, Euro..."
+                     maxlength="100">
+              <div class="invalid-feedback" *ngIf="name.invalid && name.touched">
+                <small *ngIf="name.errors?.['required']">El nombre es obligatorio</small>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="decimalPlaces" class="form-label">
+                Decimales <span class="text-danger">*</span>
+              </label>
+              <select class="form-select"
+                      id="decimalPlaces"
+                      name="decimalPlaces"
+                      [(ngModel)]="currentMoneda.decimalPlaces"
+                      required
+                      #decimalPlaces="ngModel"
+                      [class.is-invalid]="decimalPlaces.invalid && decimalPlaces.touched">
+                <option *ngFor="let option of decimalOptions" [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+              <div class="invalid-feedback" *ngIf="decimalPlaces.invalid && decimalPlaces.touched">
+                <small *ngIf="decimalPlaces.errors?.['required']">Seleccione los decimales</small>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Estado</label>
+              <div class="form-check form-switch">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="isActive"
+                       name="isActive"
+                       [(ngModel)]="currentMoneda.isActive">
+                <label class="form-check-label" for="isActive">
+                  {{ currentMoneda.isActive ? 'Activa' : 'Inactiva' }}
+                </label>
+              </div>
+            </div>
+            <div class="col-12" *ngIf="!isEditing">
+              <label class="form-label">Moneda Base</label>
+              <div class="form-check form-switch">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="isBaseCurrency"
+                       name="isBaseCurrency"
+                       [(ngModel)]="currentMoneda.isBaseCurrency">
+                <label class="form-check-label" for="isBaseCurrency">
+                  Establecer como moneda base del sistema
+                </label>
+              </div>
+              <small class="form-text text-muted">
+                Solo puede haber una moneda base. Si selecciona esta opción, se cambiará la configuración actual.
+              </small>
+            </div>
+            <div class="col-12" *ngIf="currentMoneda">
+              <div class="alert alert-info">
+                <strong>Vista Previa:</strong>
+                <code class="ms-2">{{ generatePreview(currentMoneda) }}</code>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="feather icon-x me-1"></i>
+            Cancelar
+          </button>
+          <button type="submit"
+                  class="btn btn-primary"
+                  [disabled]="!isFormValid">
+            <i class="feather icon-save me-1"></i>
+            {{ isEditing ? 'Actualizar' : 'Crear' }} Moneda
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

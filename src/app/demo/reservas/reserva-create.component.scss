@@ -1,0 +1,10 @@
+/* Estilos específicos para la pantalla de creación de reservas */
+
+/* Ajusta el web component de Google Places para que use fondo claro */
+:host ::ng-deep gmpx-place-autocomplete {
+  --gmpx-color-surface: #ffffff;
+  --gmpx-color-on-surface: #212529;
+  --gmpx-color-outline: #ced4da;
+  --gmpx-color-primary: #0d6efd;
+  --gmpx-shadow-elevation-1: 0 2px 6px rgba(0, 0, 0, 0.16);
+}

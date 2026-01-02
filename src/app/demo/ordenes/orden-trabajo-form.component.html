@@ -1,0 +1,204 @@
+<div class="row">
+  <div class="col-12">
+    <app-card [cardTitle]="titulo">
+      <form [formGroup]="form">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+          <div>
+            <h5 class="mb-1">{{ titulo }}</h5>
+            <p class="mb-0 text-muted">Crea o edita órdenes de trabajo asignando suplidor y servicios operativos.</p>
+          </div>
+          <span class="badge badge-pill px-3 py-2" [ngClass]="getEstadoBadge($any(form.get('estado')?.value))">
+            {{ form.get('estado')?.value }}
+          </span>
+        </div>
+
+      <h6 class="mb-2">Encabezado de la Orden</h6>
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <label class="form-label small text-muted">Número de Orden</label>
+          <input class="form-control" type="text" [value]="form.get('numeroOrden')?.value" disabled>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label small text-muted">Fecha de Creación</label>
+          <input class="form-control" type="date" [value]="form.get('fechaCreacion')?.value" disabled>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label small text-muted">Fecha de Servicio</label>
+          <input class="form-control" type="date" formControlName="fechaServicio" [disabled]="estadoBloqueado">
+        </div>
+        <div class="col-md-3 mb-3">
+          <label class="form-label small text-muted">Estado</label>
+          <select class="form-control" formControlName="estado" [disabled]="estadoBloqueado">
+            <option *ngFor="let estado of estadosDisponibles" [ngValue]="estado">{{ estado }}</option>
+          </select>
+        </div>
+      </div>
+
+      <hr>
+      <h6 class="mb-2">Asignación Operativa</h6>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label small text-muted">Suplidor</label>
+          <input class="form-control" type="text" formControlName="suplidor" placeholder="Selecciona suplidor" [disabled]="estadoBloqueado">
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label small text-muted">Ruta / Zona</label>
+          <input class="form-control" type="text" formControlName="ruta" placeholder="Ej: San José - Jacó" [disabled]="estadoBloqueado">
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label small text-muted">Conexión (opcional)</label>
+          <input class="form-control" type="text" formControlName="conexion" placeholder="Vuelo / Tren / Ferry" [disabled]="estadoBloqueado">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label small text-muted">Observaciones generales</label>
+          <textarea class="form-control" rows="3" formControlName="observaciones" placeholder="Indicaciones para el suplidor" [disabled]="estadoBloqueado"></textarea>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label small text-muted">Kilometraje Inicial</label>
+              <input class="form-control" type="number" formControlName="kmInicial" [disabled]="estadoBloqueado">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label small text-muted">Kilometraje Final</label>
+              <input class="form-control" type="number" formControlName="kmFinal" [disabled]="estadoBloqueado">
+            </div>
+            <div class="col-12 mb-3">
+              <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" formControlName="rotulacion" [disabled]="estadoBloqueado">
+                <label class="form-check-label">Rotulación en unidad</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr>
+      <h6 class="mb-2">Selección de Reservas / Servicios</h6>
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+        <div class="text-muted small">Reservas pendientes o confirmadas sin asignar a otra orden.</div>
+        <button class="btn btn-outline-primary btn-sm" (click)="agregarSeleccionados()" [disabled]="!detallesSeleccionados.size || estadoBloqueado">
+          <i class="feather icon-plus"></i> Agregar a la Orden
+        </button>
+      </div>
+      <div class="table-responsive mb-3">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th style="width: 40px;"></th>
+              <th>Boleta</th>
+              <th>Cliente Final</th>
+              <th>Agencia</th>
+              <th>Servicio</th>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Origen</th>
+              <th>Destino</th>
+              <th>Pax</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let det of detallesDisponibles">
+              <td>
+                <input
+                  type="checkbox"
+                  class="form-check-input position-static"
+                  [checked]="detallesSeleccionados.has(det.key)"
+                  (change)="toggleSeleccion(det, $event.target.checked)"
+                  [disabled]="estadoBloqueado">
+              </td>
+              <td>#{{ det.numeroBoleta }}</td>
+              <td>{{ det.clienteFinal }}</td>
+              <td>{{ det.agencia }}</td>
+              <td>{{ det.servicio }}</td>
+              <td>{{ det.fechaServicio }}</td>
+              <td>{{ det.hora }}</td>
+              <td>{{ det.origen }}</td>
+              <td>{{ det.destino }}</td>
+              <td><span class="badge badge-pill bg-info text-white">{{ det.pax }}</span></td>
+            </tr>
+            <tr *ngIf="!detallesDisponibles.length">
+              <td colspan="10" class="text-center text-muted">No hay servicios disponibles para agregar.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h6 class="mb-2">Servicios agregados a la Orden</h6>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0" *ngIf="detallesOrden.length; else noDetalles">
+          <thead>
+            <tr>
+              <th>Boleta</th>
+              <th>Cliente Final</th>
+              <th>Servicio</th>
+              <th>Fecha Servicio</th>
+              <th>Hora</th>
+              <th>Origen</th>
+              <th>Destino</th>
+              <th>Pax</th>
+              <th>Agencia</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let det of detallesOrden">
+              <td>#{{ det.numeroBoleta }}</td>
+              <td>{{ det.clienteFinal }}</td>
+              <td>{{ det.servicio }}</td>
+              <td>
+                <input type="date" class="form-control form-control-sm" [value]="det.fechaServicio" (change)="actualizarDetalle(det, 'fechaServicio', $event.target.value)" [disabled]="estadoBloqueado">
+              </td>
+              <td>
+                <input type="time" class="form-control form-control-sm" [value]="det.hora" (change)="actualizarDetalle(det, 'hora', $event.target.value)" [disabled]="estadoBloqueado">
+              </td>
+              <td>{{ det.origen }}</td>
+              <td>{{ det.destino }}</td>
+              <td><span class="badge badge-pill bg-info text-white">{{ det.pax }}</span></td>
+              <td>{{ det.agencia }}</td>
+              <td>
+                <button class="btn btn-outline-danger btn-sm" (click)="quitarDetalle(det)" [disabled]="estadoBloqueado">
+                  <i class="feather icon-x"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #noDetalles>
+          <div class="alert alert-light mb-0">Agrega servicios desde el listado de reservas disponibles.</div>
+        </ng-template>
+      </div>
+
+      <hr>
+      <h6 class="mb-2">Resumen Operativo</h6>
+      <div class="row align-items-center">
+        <div class="col-md-4 mb-2">
+          <span class="badge badge-pill bg-light text-dark border px-3 py-2">
+            <i class="feather icon-layers mr-1"></i>
+            {{ totalServicios }} servicio{{ totalServicios === 1 ? '' : 's' }}
+          </span>
+        </div>
+        <div class="col-md-4 mb-2">
+          <span class="badge badge-pill bg-info text-white px-3 py-2">
+            <i class="feather icon-users mr-1"></i>
+            {{ totalPax }} pax
+          </span>
+        </div>
+        <div class="col-md-4 mb-2">
+          <label class="form-label small text-muted mb-1">Total a Pagar (mock)</label>
+          <input class="form-control" type="number" formControlName="totalPagar" [placeholder]="totalPagarSugerido" [disabled]="estadoBloqueado">
+        </div>
+      </div>
+
+        <div class="d-flex flex-wrap justify-content-end mt-3">
+          <button class="btn btn-link text-secondary mr-2" type="button" (click)="cancelar()">Cancelar</button>
+          <button class="btn btn-outline-primary mr-2" type="button" (click)="guardar()" [disabled]="estadoBloqueado">Guardar</button>
+          <button class="btn btn-primary mr-2" type="button" (click)="guardarYAsignar()" [disabled]="estadoBloqueado">Guardar y Asignar</button>
+          <button class="btn btn-success" type="button" (click)="finalizar()" [disabled]="estadoBloqueado">Finalizar Orden</button>
+        </div>
+      </form>
+    </app-card>
+  </div>
+</div>

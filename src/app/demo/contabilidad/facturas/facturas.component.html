@@ -1,0 +1,28 @@
+<div class="row">
+  <div class="col-12">
+    <app-card cardTitle="Facturas">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Número</th>
+              <th>Cliente</th>
+              <th>Monto</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let factura of facturas">
+              <td>{{ factura.numero }}</td>
+              <td>{{ factura.cliente }}</td>
+              <td>₡{{ factura.monto.toLocaleString() }}</td>
+              <td>{{ factura.fecha }}</td>
+              <td>{{ factura.estado }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </app-card>
+  </div>
+</div>

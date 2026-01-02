@@ -1,0 +1,40 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import 'scss/variables';
+
+/* fonts-icon */
+@import 'scss/fonts/fontawesome/scss/fontawesome';
+@import 'scss/fonts/feather/iconfont';
+
+@import 'scss/general';
+@import 'scss/generic';
+@import 'scss/mixins/function';
+
+/* important element */
+@import 'scss/menu/pc-footer.scss';
+@import 'scss/menu/menu-lite';
+
+/* basic elements */
+@import 'scss/theme-elements/theme-elements';
+
+/* third party modules style*/
+@import 'scss/plugins/plugins';
+
+@import 'scss/custom';
+
+/* Estilo claro para el web component de Google Places Autocomplete */
+gmpx-place-autocomplete {
+  --gmpx-color-surface: #ffffff;
+  --gmpx-color-on-surface: #212529;
+  --gmpx-color-outline: #ced4da;
+  --gmpx-color-primary: #0d6efd;
+  --gmpx-shadow-elevation-1: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+/* Extra polish: bordes suaves y sombra ligera */
+gmpx-place-autocomplete.places-autocomplete-themed {
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+  display: block;
+}

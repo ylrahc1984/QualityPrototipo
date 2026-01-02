@@ -1,0 +1,132 @@
+<div class="suplidores-wrapper">
+  <div class="page-header">
+    <div>
+      <h4 class="title">Suplidores</h4>
+      <p class="subtitle">Administra transportistas, guías y operadores aliados.</p>
+    </div>
+    <div>
+      <button class="btn btn-primary" (click)="openForm()">
+        <i class="feather icon-plus"></i> Nuevo Suplidor
+      </button>
+    </div>
+  </div>
+
+  <div class="filters-card">
+    <div class="row">
+      <div class="col-lg-3 col-md-6 mb-3">
+        <label class="small-label">Código</label>
+        <input class="form-control" [ngModel]="filterCodigo()" (ngModelChange)="filterCodigo.set($event)" placeholder="Buscar por código">
+      </div>
+      <div class="col-lg-3 col-md-6 mb-3">
+        <label class="small-label">Nombre / Razón Social</label>
+        <input class="form-control" [ngModel]="filterNombre()" (ngModelChange)="filterNombre.set($event)" placeholder="Buscar por nombre o razón social">
+      </div>
+      <div class="col-lg-3 col-md-6 mb-3">
+        <label class="small-label">Identificación</label>
+        <input class="form-control" [ngModel]="filterIdentificacion()" (ngModelChange)="filterIdentificacion.set($event)" placeholder="Cédula / RUC / Pasaporte">
+      </div>
+      <div class="col-lg-3 col-md-6 mb-3">
+        <label class="small-label">Tipo de Suplidor</label>
+        <select class="form-control" [ngModel]="filterTipo()" (ngModelChange)="filterTipo.set($event)">
+          <option value="Todos">Todos</option>
+          <option value="Transportista">Transportista</option>
+          <option value="Guía">Guía</option>
+          <option value="Empresa">Empresa</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+    </div>
+    <div class="row align-items-end">
+      <div class="col-lg-3 col-md-6 mb-3">
+        <label class="small-label">Estado</label>
+        <select class="form-control" [ngModel]="filterEstado()" (ngModelChange)="filterEstado.set($event)">
+          <option value="Todos">Todos</option>
+          <option value="Activo">Activo</option>
+          <option value="Inactivo">Inactivo</option>
+        </select>
+      </div>
+      <div class="col-lg-9 col-md-6 mb-3 text-right">
+        <button class="btn btn-light btn-sm mr-2" (click)="clearFilters()">
+          <i class="feather icon-x"></i> Limpiar filtros
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <h6 class="m-0"><i class="feather icon-truck"></i> Listado de suplidores</h6>
+      <span class="count-chip">{{ suplidoresFiltrados().length }} registros</span>
+    </div>
+    <div class="table-responsive" *ngIf="suplidoresFiltrados().length; else noData">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre / Razón Social</th>
+            <th>Identificación</th>
+            <th>Contacto</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let suplidor of suplidoresFiltrados()">
+            <td>{{ suplidor.codigo }}</td>
+            <td>{{ suplidor.nombre }}</td>
+            <td>{{ suplidor.identificacion }}</td>
+            <td>{{ suplidor.contacto || 'N/D' }}</td>
+            <td>{{ suplidor.email || 'N/D' }}</td>
+            <td>{{ suplidor.telefono1 || suplidor.telefono2 || 'N/D' }}</td>
+            <td><span class="badge {{ getEstadoBadge(suplidor.activo) }}">{{ suplidor.activo ? 'Activo' : 'Inactivo' }}</span></td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn btn-sm btn-outline-secondary" (click)="openForm(suplidor, true)" title="Ver">
+                  <i class="feather icon-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-primary ml-1" (click)="openForm(suplidor)" title="Editar">
+                  <i class="feather icon-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-warning ml-1" (click)="toggleActive(suplidor.codigo)" title="Activar/Desactivar">
+                  <i class="feather icon-power"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ng-template #noData>
+      <div class="empty-state text-center p-4">
+        <i class="feather icon-archive empty-icon"></i>
+        <p class="mb-2">No hay suplidores que coincidan con los filtros.</p>
+        <button class="btn btn-primary" (click)="openForm()"><i class="feather icon-plus"></i> Crear suplidor</button>
+      </div>
+    </ng-template>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" [ngClass]="{'show': showForm, 'd-block': showForm}" *ngIf="showForm" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{ readOnly ? 'Detalle de Suplidor' : (editingSuplidor ? 'Editar Suplidor' : 'Nuevo Suplidor') }}</h5>
+        <button type="button" class="close" (click)="closeForm()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <app-suplidor-form
+          [suplidor]="editingSuplidor"
+          [readOnly]="readOnly"
+          (save)="onSave($event)"
+          (cancel)="closeForm()">
+        </app-suplidor-form>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="showForm"></div>

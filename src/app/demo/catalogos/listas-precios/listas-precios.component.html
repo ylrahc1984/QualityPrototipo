@@ -1,0 +1,71 @@
+<div class="row">
+  <div class="col-12">
+    <app-card cardTitle="Listas de Precios">
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <input type="text" class="form-control" [(ngModel)]="filterNombre" (input)="filteredListas()" placeholder="Buscar por nombre o descripción">
+        </div>
+        <div class="col-md-2">
+          <select class="form-control" [(ngModel)]="filterEstado" (change)="filteredListas()">
+            <option value="">Todos los estados</option>
+            <option value="activa">Activa</option>
+            <option value="inactiva">Inactiva</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-control" [(ngModel)]="filterMoneda" (change)="filteredListas()">
+            <option value="">Todas las monedas</option>
+            <option value="CRC">CRC</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <input type="date" class="form-control" [(ngModel)]="filterVigenciaDesde" (change)="filteredListas()" placeholder="Desde">
+        </div>
+        <div class="col-md-2">
+          <input type="date" class="form-control" [(ngModel)]="filterVigenciaHasta" (change)="filteredListas()" placeholder="Hasta">
+        </div>
+        <div class="col-md-1">
+          <button class="btn btn-primary" (click)="openForm()">
+            <i class="feather icon-plus"></i>
+          </button>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Moneda</th>
+              <th>Vigencia</th>
+              <th>Estado</th>
+              <th>Última Actualización</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let lista of filteredListas()">
+              <td>{{ lista.nombre }}</td>
+              <td>{{ lista.moneda }}</td>
+              <td>{{ formatDate(lista.vigenciaDesde) }} - {{ formatDate(lista.vigenciaHasta) }}</td>
+              <td><span class="badge {{ getEstadoBadge(lista.activa) }}">{{ getEstadoText(lista.activa) }}</span></td>
+              <td>{{ formatDate(lista.updatedAt) }}</td>
+              <td>
+                <button class="btn btn-sm btn-outline-info" [routerLink]="['/catalogos/listas-precios', lista.id, 'detalle']" title="Ver Detalle">
+                  <i class="feather icon-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-warning ml-1" (click)="openForm(lista)" title="Editar">
+                  <i class="feather icon-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-success ml-1" (click)="toggleActive(lista.id)" [title]="lista.activa ? 'Desactivar' : 'Activar'">
+                  <i class="feather" [ngClass]="lista.activa ? 'icon-pause' : 'icon-play'"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </app-card>
+  </div>
+</div>

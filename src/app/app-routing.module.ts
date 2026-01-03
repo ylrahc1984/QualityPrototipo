@@ -128,6 +128,10 @@ const routes: Routes = [
       {
         path: '',
         loadComponent: () => import('./demo/contabilidad/facturas/facturas.component').then((c) => c.FacturasComponent)
+      },
+      {
+        path: 'nueva',
+        loadComponent: () => import('./demo/contabilidad/facturas/factura-form.component').then((c) => c.FacturaFormComponent)
       }
     ]
   },
@@ -286,6 +290,10 @@ const routes: Routes = [
       {
         path: 'ventas',
         loadComponent: () => import('./demo/reportes/ventas/ventas.component').then((c) => c.VentasComponent)
+      },
+      {
+        path: 'reservas',
+        loadComponent: () => import('./demo/reportes/reservas/reservas.component').then((c) => c.ReservasComponent)
       },
       {
         path: 'ingresos',

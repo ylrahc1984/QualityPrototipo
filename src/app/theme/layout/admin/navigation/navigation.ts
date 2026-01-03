@@ -195,6 +195,14 @@ export const NavigationItems: NavigationItem[] = [
             classes: 'nav-item'
           },
           {
+            id: 'reservas-reporte',
+            title: 'Reservas',
+            type: 'item',
+            url: '/reportes/reservas',
+            icon: 'feather icon-calendar',
+            classes: 'nav-item'
+          },
+          {
             id: 'ingresos',
             title: 'Ingresos',
             type: 'item',

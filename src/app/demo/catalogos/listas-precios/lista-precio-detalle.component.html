@@ -2,93 +2,75 @@
   <div class="col-12">
     <!-- Header de contexto compacto con selector -->
     <div class="header-card">
-      <div class="header-content">
-        <div class="header-info">
-          <div class="breadcrumb-section">
-            <nav aria-label="breadcrumb">
-              <ol class="breadcrumb breadcrumb-custom">
-                <li class="breadcrumb-item">
-                  <a href="#" (click)="volverAListas(); $event.preventDefault()" class="breadcrumb-link">
-                    <i class="feather icon-home"></i> Listas de Precios
-                  </a>
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">
-                  <i class="feather icon-tag"></i> {{ listaPrecio.nombre }}
-                </li>
-              </ol>
-            </nav>
+      <div class="header-top">
+        <div class="breadcrumb-section">
+          <nav aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-custom">
+              <li class="breadcrumb-item">
+                <a href="#" (click)="volverAListas(); $event.preventDefault()" class="breadcrumb-link">
+                  <i class="feather icon-home"></i> Listas de Precios
+                </a>
+              </li>
+              <li class="breadcrumb-item active" aria-current="page">
+                <i class="feather icon-tag"></i> {{ listaPrecio.nombre }}
+              </li>
+            </ol>
+          </nav>
+        </div>
+        <span class="estado-chip badge-custom {{ getEstadoBadge(listaPrecio.activa) }}">
+          <i class="feather {{ getIconClass(listaPrecio.activa) }}"></i>
+          {{ getEstadoText(listaPrecio.activa) }}
+        </span>
+      </div>
+
+      <div class="header-main">
+        <div class="title-block">
+          <h3 class="main-title">
+            <i class="feather icon-dollar-sign title-icon"></i>
+            {{ listaPrecio.nombre }}
+          </h3>
+          <p class="subtitle" *ngIf="listaPrecio.descripcion">{{ listaPrecio.descripcion }}</p>
+
+          <div class="meta-chips">
+            <span class="meta-chip">
+              <i class="feather icon-dollar-sign"></i>
+              <span>Moneda</span>
+              <strong>{{ listaPrecio.moneda }}</strong>
+            </span>
+            <span class="meta-chip">
+              <i class="feather icon-calendar"></i>
+              <span>Vigencia</span>
+              <strong>{{ formatDate(listaPrecio.vigenciaDesde) }} - {{ formatDate(listaPrecio.vigenciaHasta) }}</strong>
+            </span>
+          </div>
+        </div>
+
+        <div class="header-controls">
+          <div class="selector-group compact">
+            <label class="selector-label">
+              <i class="feather icon-list"></i>
+              Servicio
+            </label>
+            <div class="select-wrapper slim">
+              <select class="form-control custom-select" [ngModel]="selectedServicioId()" (ngModelChange)="onServicioChange($event)">
+                <option [value]="0">
+                  <i class="feather {{ getChevronIcon() }}"></i> Seleccione un servicio...
+                </option>
+                <option *ngFor="let servicio of servicios" [value]="servicio.id">
+                  <i class="feather {{ getServicioIcon() }}"></i> {{ servicio.nombre }}
+                </option>
+              </select>
+              <div class="select-arrow">
+                <i class="feather icon-chevron-down"></i>
+              </div>
+            </div>
           </div>
 
-          <div class="title-section">
-            <h3 class="main-title">
-              <i class="feather icon-dollar-sign title-icon"></i>
-              {{ listaPrecio.nombre }}
-            </h3>
-            <p class="subtitle" *ngIf="listaPrecio.descripcion">{{ listaPrecio.descripcion }}</p>
-          </div>
-
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-icon">
-                <i class="feather icon-dollar-sign"></i>
-              </div>
-              <div class="info-content">
-                <span class="info-label">Moneda</span>
-                <span class="info-value">{{ listaPrecio.moneda }}</span>
-              </div>
-            </div>
-
-            <div class="info-item">
-              <div class="info-icon">
-                <i class="feather icon-calendar"></i>
-              </div>
-              <div class="info-content">
-                <span class="info-label">Vigencia</span>
-                <span class="info-value">{{ formatDate(listaPrecio.vigenciaDesde) }} - {{ formatDate(listaPrecio.vigenciaHasta) }}</span>
-              </div>
-            </div>
-
-            <div class="info-item">
-              <div class="info-icon">
-                <i class="feather icon-activity"></i>
-              </div>
-              <div class="info-content">
-                <span class="info-label">Estado</span>
-                <span class="badge-custom {{ getEstadoBadge(listaPrecio.activa) }}">
-                  <i class="feather {{ getIconClass(listaPrecio.activa) }}"></i>
-                  {{ getEstadoText(listaPrecio.activa) }}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div class="header-toolbar">
-            <div class="selector-group compact">
-              <label class="selector-label">
-                <i class="feather icon-list"></i>
-                Servicio
-              </label>
-              <div class="select-wrapper">
-                <select class="form-control custom-select" [ngModel]="selectedServicioId()" (ngModelChange)="onServicioChange($event)">
-                  <option [value]="0">
-                    <i class="feather {{ getChevronIcon() }}"></i> Seleccione un servicio...
-                  </option>
-                  <option *ngFor="let servicio of servicios" [value]="servicio.id">
-                    <i class="feather {{ getServicioIcon() }}"></i> {{ servicio.nombre }}
-                  </option>
-                </select>
-                <div class="select-arrow">
-                  <i class="feather icon-chevron-down"></i>
-                </div>
-              </div>
-            </div>
-
-            <div class="header-actions">
-              <button class="btn btn-primary btn-action" (click)="openForm()">
-                <i class="feather icon-plus"></i>
-                <span>Agregar Regla</span>
-              </button>
-            </div>
+          <div class="header-actions">
+            <button class="btn btn-primary btn-action" (click)="openForm()">
+              <i class="feather icon-plus"></i>
+              <span>Agregar Regla</span>
+            </button>
           </div>
         </div>
       </div>

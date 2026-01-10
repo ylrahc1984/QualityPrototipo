@@ -16,27 +16,79 @@
         <div class="mb-4">
           <i class="feather icon-unlock auth-icon"></i>
         </div>
-        <h3 class="mb-4">Login</h3>
-        <div class="input-group mb-3">
-          <input type="email" class="form-control" placeholder="Email" />
+        <h3 class="mb-4">Iniciar Sesión</h3>
+
+        <!-- Mensaje de Error -->
+        <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+          <i class="feather icon-alert-circle"></i>
+          <span class="ms-2">{{ errorMessage }}</span>
+          <button 
+            type="button" 
+            class="btn-close" 
+            (click)="errorMessage = ''"
+            aria-label="Close">
+          </button>
         </div>
-        <div class="input-group mb-4">
-          <input type="password" class="form-control" placeholder="Password" />
-        </div>
-        <div class="form-group text-start mb-4">
-          <div class="checkbox checkbox-fill d-inline">
-            <input type="checkbox" name="checkbox-fill-1" id="checkbox-fill-a1" checked="" />
-            <label for="checkbox-fill-a1" class="cr">Save Details</label>
+
+        <!-- Formulario de Login -->
+        <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+          <!-- Campo Usuario -->
+          <div class="input-group mb-3">
+            <input 
+              type="text" 
+              class="form-control"
+              formControlName="usuario"
+              placeholder="Usuario"
+              [class.is-invalid]="usuario?.invalid && usuario?.touched"
+              [disabled]="isLoading" />
+            <div class="invalid-feedback" *ngIf="usuario?.invalid && usuario?.touched">
+              <span *ngIf="usuario?.errors?.['required']">El usuario es requerido</span>
+              <span *ngIf="usuario?.errors?.['minlength']">Mínimo 3 caracteres</span>
+            </div>
           </div>
-        </div>
-        <button class="btn btn-primary mb-4" (click)="onLogin()">Login</button>
+
+          <!-- Campo Contraseña -->
+          <div class="input-group mb-4">
+            <input 
+              [type]="showPassword ? 'text' : 'password'" 
+              class="form-control"
+              formControlName="clave"
+              placeholder="Contraseña"
+              [class.is-invalid]="clave?.invalid && clave?.touched"
+              [disabled]="isLoading" />
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary"
+              (click)="togglePasswordVisibility()"
+              [disabled]="isLoading"
+              tabindex="-1">
+              <i [class]="showPassword ? 'feather icon-eye-off' : 'feather icon-eye'"></i>
+            </button>
+            <div class="invalid-feedback" *ngIf="clave?.invalid && clave?.touched">
+              <span *ngIf="clave?.errors?.['required']">La contraseña es requerida</span>
+              <span *ngIf="clave?.errors?.['minlength']">Mínimo 3 caracteres</span>
+            </div>
+          </div>
+
+          <!-- Botón Login -->
+          <button 
+            type="submit" 
+            class="btn btn-primary mb-4 w-100"
+            [disabled]="isLoading">
+            <span *ngIf="!isLoading">Iniciar Sesión</span>
+            <span *ngIf="isLoading">
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Cargando...
+            </span>
+          </button>
+        </form>
         <p class="mb-2 text-muted">
-          Forgot password?
-          <a href="javascript:">Reset</a>
+          ¿Olvidó su contraseña?
+          <a href="javascript:">Restablecer</a>
         </p>
         <p class="mb-0 text-muted">
-          Don’t have an account?
-          <a [routerLink]="['/register']">Sign up</a>
+          ¿No tiene cuenta?
+          <a [routerLink]="['/register']">Registrarse</a>
         </p>
       </div>
     </div>

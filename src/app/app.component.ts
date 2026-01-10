@@ -14,7 +14,7 @@ import { SpinnerComponent } from './theme/shared/components/spinner/spinner.comp
 export class AppComponent implements OnInit {
   private router = inject(Router);
 
-  title = 'datta-able';
+  title = 'PmsNext_OpeTours';
 
   // life cycle hook
   ngOnInit() {

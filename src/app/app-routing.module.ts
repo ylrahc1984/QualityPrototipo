@@ -4,6 +4,8 @@ import { Routes, RouterModule } from '@angular/router';
 // project import
 import { AdminComponent } from './theme/layout/admin/admin.component';
 import { GuestComponent } from './theme/layout/guest/guest.component';
+import { AuthGuard } from './core/guards/auth.guard';
+import { LoginGuard } from './core/guards/login.guard';
 
 const routes: Routes = [
   {
@@ -14,6 +16,7 @@ const routes: Routes = [
   {
     path: 'login',
     component: GuestComponent,
+    canActivate: [LoginGuard],
     children: [
       {
         path: '',
@@ -24,6 +27,7 @@ const routes: Routes = [
   {
     path: 'register',
     component: GuestComponent,
+    canActivate: [LoginGuard],
     children: [
       {
         path: '',
@@ -34,6 +38,8 @@ const routes: Routes = [
   {
     path: 'dashboard',
     component: AdminComponent,
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     children: [
       {
         path: '',
@@ -44,6 +50,8 @@ const routes: Routes = [
   {
     path: 'operaciones',
     component: AdminComponent,
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     children: [
       {
         path: 'reservas',
@@ -92,6 +100,8 @@ const routes: Routes = [
     pathMatch: 'full'
   },
   {
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     path: 'clientes',
     component: AdminComponent,
     children: [
@@ -102,6 +112,8 @@ const routes: Routes = [
     ]
   },
   {
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     path: 'cuentas-cobrar',
     component: AdminComponent,
     children: [
@@ -112,6 +124,8 @@ const routes: Routes = [
     ]
   },
   {
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     path: 'cuentas-pagar',
     component: AdminComponent,
     children: [
@@ -122,6 +136,8 @@ const routes: Routes = [
     ]
   },
   {
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     path: 'facturas',
     component: AdminComponent,
     children: [
@@ -136,6 +152,8 @@ const routes: Routes = [
     ]
   },
   {
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     path: 'servicios',
     component: AdminComponent,
     children: [
@@ -154,6 +172,8 @@ const routes: Routes = [
     ]
   },
   {
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     path: 'catalogos',
     component: AdminComponent,
     children: [
@@ -194,6 +214,8 @@ const routes: Routes = [
     ]
   },
   {
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     path: 'suplidores',
     redirectTo: 'catalogos/suplidores',
     pathMatch: 'full'
@@ -201,6 +223,8 @@ const routes: Routes = [
   {
     path: 'usuarios-perfiles',
     component: AdminComponent,
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     children: [
       {
         path: '',
@@ -209,6 +233,8 @@ const routes: Routes = [
     ]
   },
   {
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     path: 'usuario-detalle',
     component: AdminComponent,
     children: [
@@ -219,6 +245,8 @@ const routes: Routes = [
     ]
   },
   {
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     path: 'formas-pago',
     component: AdminComponent,
     children: [
@@ -229,16 +257,20 @@ const routes: Routes = [
     ]
   },
   {
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     path: 'forma-pago-detalle',
     component: AdminComponent,
     children: [
       {
         path: '',
         loadComponent: () => import('./demo/administracion/forma-pago-detalle/forma-pago-detalle').then((c) => c.FormaPagoDetalleComponent)
-      }
+     }
     ]
   },
   {
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     path: 'correlativos',
     component: AdminComponent,
     children: [
@@ -250,6 +282,8 @@ const routes: Routes = [
   },
   {
     path: 'monedas',
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     component: AdminComponent,
     children: [
       {
@@ -259,6 +293,8 @@ const routes: Routes = [
     ]
   },
   {
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
     path: 'tipo-cambio',
     redirectTo: 'administracion/tipo-cambio',
     pathMatch: 'full'
@@ -268,6 +304,8 @@ const routes: Routes = [
     component: AdminComponent,
     children: [
       {
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
         path: '',
         loadComponent: () => import('./demo/contabilidad/recibos/recibos.component').then((c) => c.RecibosComponent)
       }

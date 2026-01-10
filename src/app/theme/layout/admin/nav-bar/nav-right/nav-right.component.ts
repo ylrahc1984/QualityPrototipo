@@ -1,26 +1,35 @@
 // angular import
+import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 
 // bootstrap import
 import { NgbDropdownConfig } from '@ng-bootstrap/ng-bootstrap';
 
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
+import { AuthService } from 'src/app/core/services/auth.service';
 
 @Component({
   selector: 'app-nav-right',
-  imports: [SharedModule],
+  imports: [CommonModule, SharedModule],
   templateUrl: './nav-right.component.html',
   styleUrls: ['./nav-right.component.scss'],
   providers: [NgbDropdownConfig]
 })
 export class NavRightComponent {
-  // public props
+  user$ = inject(AuthService).currentUser$;
 
-  // constructor
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
   constructor() {
     const config = inject(NgbDropdownConfig);
-
     config.placement = 'bottom-right';
+  }
+
+  onLogout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }
